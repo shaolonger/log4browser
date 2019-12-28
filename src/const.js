@@ -1,5 +1,5 @@
 /**
- * 异常级别
+ * Error levels
  */
 const ERROR_LEVEL = {
     'INFO': 'info',
@@ -8,7 +8,7 @@ const ERROR_LEVEL = {
 };
 
 /**
- * 异常类型
+ * Error categories
  */
 const ERROR_CATEGORY = {
     'JS': 'js',
