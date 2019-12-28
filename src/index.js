@@ -7,7 +7,7 @@ class Logger {
     }
 
     /**
-     * 初始化
+     * The init method
      * @param config
      */
     init(config) {
@@ -28,7 +28,7 @@ class Logger {
     }
 
     /**
-     * 处理js异常
+     * Handle JS errors
      * @param config
      */
     handleJsError(config) {
@@ -57,7 +57,7 @@ class Logger {
     }
 
     /**
-     * 处理Promise异常
+     * Handle Promise errors
      * @param config
      */
     handlePromiseRejectError(config) {
@@ -75,7 +75,7 @@ class Logger {
     }
 
     /**
-     * 处理资源加载异常
+     * Handle Resource errors
      * @param config
      */
     handleResourceError(config) {
@@ -84,7 +84,7 @@ class Logger {
             if (event) {
                 let target = event.target || event.srcElement;
                 let isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
-                if (!isElementTarget) return; // js错误已由handleJsError处理
+                if (!isElementTarget) return; // JS errors has been captured by handleJsError method
                 self.isSendError && config.sendError({
                     title: target.nodeName,
                     msg: target.src || target.href,
@@ -96,12 +96,12 @@ class Logger {
     }
 
     /**
-     * 处理Ajax异常
+     * Handle Ajax errors
      * @param config
      */
     handleAjaxError(config) {
         let self = this;
-        // 处理fetch
+        // fetch
         if (window.fetch) {
             let oldFetch = window.fetch;
             window.fetch = function () {
@@ -131,7 +131,7 @@ class Logger {
                     })
             }
         }
-        // 处理XMLHttpRequest
+        // XMLHttpRequest
         if (window.XMLHttpRequest) {
             let xmlhttp = window.XMLHttpRequest;
             let oldSend = xmlhttp.prototype.send;
@@ -170,7 +170,7 @@ class Logger {
     }
 
     /**
-     * 处理控制台报错
+     * Handle console errors
      * @param config
      */
     handleConsoleError(config) {
@@ -189,14 +189,14 @@ class Logger {
     }
 
     /**
-     * 开始异常处理
+     * Start automatically send logs data to callback function
      */
     startSendError() {
         this.isSendError = true;
     }
 
     /**
-     * 停止异常处理
+     * Stop automatically send logs data to callback function
      */
     stopSendError() {
         this.isSendError = false;
