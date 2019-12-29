@@ -6,7 +6,7 @@ const DEFAULT_CONFIG = {
     captureResourceError: true,
     captureAjaxError: true,
     captureConsoleError: false,
-    autoReport: true, // If true, log4browser will automatically call callback function
+    isAutoHandle: true, // If true, log4browser will automatically call callback function
 };
 
 module.exports = {
