@@ -1,12 +1,12 @@
 # log4browser
 
-This is a log tool for usage in browser.
+This is a simple log tool for usage in browser.
 
-Dont like Java, we lack good log tool in browser environment, which can help use to trace error and problems more efficiently.
+Dont like Java or the other language, we lack good log tool in browser environment, which can help us trace errors or problems more efficiently.
 
 So this is what log4browser try to do.
 
-Welcome to develop together or pose an issue.
+Welcome to develop together or put an issue.
 
 ## Installation
 
@@ -19,7 +19,7 @@ npm install log4browser
 // create instance
 var logger = new Logger();
 // set up log config,
-// then logger will work automatically
+// then logger will work automatically by calling 'sendError'
 var config = {
     captureJsError: true,
     captureResourceError: true,
