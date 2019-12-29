@@ -17,9 +17,10 @@ npm install log4browser
 ## Usage
 ```javascript
 // 1.create instance
-var logger = new Logger();
+var log4browser = require("log4browser");
+var logger = new log4browser();
 
-// 2.set up log config,
+// 2.init with your own config
 var config = {
     captureJsError: true,
     captureResourceError: true,
@@ -30,6 +31,7 @@ var config = {
         // something to do with logData
     }
 };
+logger.init(config);
 
 // 3.(optional)switch errorHandler automation
 logger.setIsAutoHandle(false); // stop
