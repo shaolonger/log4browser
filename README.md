@@ -16,19 +16,24 @@ npm install log4browser
 
 ## Usage
 ```javascript
-// create instance
+// 1.create instance
 var logger = new Logger();
-// set up log config,
-// then logger will work automatically by calling 'sendError'
+
+// 2.set up log config,
 var config = {
     captureJsError: true,
     captureResourceError: true,
     captureAjaxError: true,
     captureConsoleError: false,
-    autoReport: true,
-    sendError: function (logData) {
+    isAutoHandle: true, // if true, logger will call errorHandler automatically
+    errorHandler: function (logData) {
+        // something to do with logData
     }
 };
+
+// 3.(optional)switch errorHandler automation
+logger.setIsAutoHandle(false); // stop
+logger.setIsAutoHandle(true); // restart
 ```
 
 ## License

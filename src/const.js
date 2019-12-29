@@ -3,7 +3,7 @@
  */
 const ERROR_LEVEL = {
     'INFO': 'info',
-    'WARNING': 'warning',
+    'WARN': 'warn',
     'ERROR': 'error'
 };
 

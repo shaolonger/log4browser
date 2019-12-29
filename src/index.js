@@ -2,9 +2,7 @@ const CONST = require('./const');
 const CONFIG = require('./config');
 
 class Logger {
-    constructor() {
-        this.isSendError = true;
-    }
+    constructor() {}
 
     /**
      * The init method
@@ -32,17 +30,16 @@ class Logger {
      * @param config
      */
     handleJsError(config) {
-        let self = this;
         window.onerror = function (msg, url, line, col, error) {
             if (error && error.stack) {
-                self.isSendError && config.sendError({
+                config.isAutoHandle && config.errorHandler({
                     title: msg,
                     msg: error.stack,
                     category: CONST.ERROR_CATEGORY.JS,
                     level: CONST.ERROR_LEVEL.ERROR
                 });
             } else if (typeof msg === 'string') {
-                self.isSendError && config.sendError({
+                config.isAutoHandle && config.errorHandler({
                     title: msg,
                     msg: JSON.stringify({
                         resourceUrl: url,
@@ -61,10 +58,9 @@ class Logger {
      * @param config
      */
     handlePromiseRejectError(config) {
-        let self = this;
         window.addEventListener('unhandledrejection', function (event) {
             if (event) {
-                self.isSendError && config.sendError({
+                config.isAutoHandle && config.errorHandler({
                     title: 'unhandledrejection',
                     msg: event.reason,
                     category: CONST.ERROR_CATEGORY.JS,
@@ -79,13 +75,12 @@ class Logger {
      * @param config
      */
     handleResourceError(config) {
-        let self = this;
         window.addEventListener('error', function (event) {
             if (event) {
                 let target = event.target || event.srcElement;
                 let isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
                 if (!isElementTarget) return; // JS errors has been captured by handleJsError method
-                self.isSendError && config.sendError({
+                config.isAutoHandle && config.errorHandler({
                     title: target.nodeName,
                     msg: target.src || target.href,
                     category: CONST.ERROR_CATEGORY.RESOURCE,
@@ -100,7 +95,6 @@ class Logger {
      * @param config
      */
     handleAjaxError(config) {
-        let self = this;
         // fetch
         if (window.fetch) {
             let oldFetch = window.fetch;
@@ -108,7 +102,7 @@ class Logger {
                 return oldFetch.apply(this, arguments)
                     .then(res => {
                         if (!res.ok) {
-                            self.isSendError && config.sendError({
+                            config.isAutoHandle && config.errorHandler({
                                 title: arguments[0],
                                 msg: JSON.stringify(res),
                                 category: CONST.ERROR_CATEGORY.AJAX,
@@ -118,7 +112,7 @@ class Logger {
                         return res;
                     })
                     .catch(error => {
-                        self.isSendError && config.sendError({
+                        config.isAutoHandle && config.errorHandler({
                             title: arguments[0],
                             msg: JSON.stringify({
                                 message: error.message,
@@ -137,7 +131,7 @@ class Logger {
             let oldSend = xmlhttp.prototype.send;
             let handleEvent = function (event) {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
-                    self.isSendError && config.sendError({
+                    config.isAutoHandle && config.errorHandler({
                         title: event.target.responseURL,
                         msg: JSON.stringify({
                             response: event.target.response,
@@ -175,10 +169,9 @@ class Logger {
      */
     handleConsoleError(config) {
         if (!window.console || !window.console.error) return;
-        let self = this;
         let oldConsoleError = window.console.error;
         window.console.error = function () {
-            self.isSendError && config.sendError({
+            config.isAutoHandle && config.errorHandler({
                 title: 'consoleError',
                 msg: JSON.stringify(arguments.join(',')),
                 category: CONST.ERROR_CATEGORY.JS,
@@ -189,17 +182,11 @@ class Logger {
     }
 
     /**
-     * Start automatically send logs data to callback function
+     * Switch isAutoHandle
+     * @param isAutoHandle
      */
-    startSendError() {
-        this.isSendError = true;
-    }
-
-    /**
-     * Stop automatically send logs data to callback function
-     */
-    stopSendError() {
-        this.isSendError = false;
+    setIsAutoHandle(isAutoHandle) {
+        this.config.isAutoHandle = !!isAutoHandle;
     }
 };
 
