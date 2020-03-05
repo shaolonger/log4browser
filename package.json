@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/shaolonger/log4browser/issues"
   },
-  "homepage": "https://github.com/shaolonger/log4browser#readme"
+  "homepage": "https://github.com/shaolonger/log4browser#readme",
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
 }
