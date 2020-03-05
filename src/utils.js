@@ -104,6 +104,6 @@ const getDeviceInfo = () => {
     return device;
 };
 
-export {
+module.exports = {
     getDeviceInfo
 };

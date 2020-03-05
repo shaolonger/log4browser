@@ -1,9 +1,8 @@
-import moment from 'moment';
-import {getDeviceInfo} from './utils';
-
+const moment = require('moment');
+const UTILS = require('./utils');
 const CONST = require('./const');
 const CONFIG = require('./config');
-const DEVICE_INFO = getDeviceInfo();
+const DEVICE_INFO = UTILS.getDeviceInfo();
 
 const getLogBasicInfo = () => {
     return {
