@@ -17,7 +17,8 @@ const getLogBasicInfo = () => {
 };
 
 class Logger {
-    constructor() {}
+    constructor() {
+    }
 
     /**
      * The init method
@@ -47,17 +48,15 @@ class Logger {
     handleJsError(config) {
         window.onerror = function (msg, url, line, col, error) {
             if (error && error.stack) {
-                config.isAutoHandle && config.errorHandler({
-                    ...getLogBasicInfo(),
+                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                     projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                     title: msg,
                     msg: error.stack,
                     category: CONST.ERROR_CATEGORY.JS,
                     level: CONST.ERROR_LEVEL.ERROR
-                });
+                }));
             } else if (typeof msg === 'string') {
-                config.isAutoHandle && config.errorHandler({
-                    ...getLogBasicInfo(),
+                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                     projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                     title: msg,
                     msg: JSON.stringify({
@@ -67,7 +66,7 @@ class Logger {
                     }),
                     category: CONST.ERROR_CATEGORY.JS,
                     level: CONST.ERROR_LEVEL.ERROR
-                });
+                }));
             }
         };
     }
@@ -79,14 +78,13 @@ class Logger {
     handlePromiseRejectError(config) {
         window.addEventListener('unhandledrejection', function (event) {
             if (event) {
-                config.isAutoHandle && config.errorHandler({
-                    ...getLogBasicInfo(),
+                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                     projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                     title: 'unhandledrejection',
                     msg: event.reason,
                     category: CONST.ERROR_CATEGORY.JS,
                     level: CONST.ERROR_LEVEL.ERROR
-                });
+                }));
             }
         }, true);
     }
@@ -101,14 +99,13 @@ class Logger {
                 let target = event.target || event.srcElement;
                 let isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
                 if (!isElementTarget) return; // JS errors has been captured by handleJsError method
-                config.isAutoHandle && config.errorHandler({
-                    ...getLogBasicInfo(),
+                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                     projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                     title: target.nodeName,
                     msg: target.src || target.href,
                     category: CONST.ERROR_CATEGORY.RESOURCE,
                     level: CONST.ERROR_LEVEL.ERROR
-                });
+                }));
             }
         }, true);
     }
@@ -125,20 +122,18 @@ class Logger {
                 return oldFetch.apply(this, arguments)
                     .then(res => {
                         if (!res.ok) {
-                            config.isAutoHandle && config.errorHandler({
-                                ...getLogBasicInfo(),
+                            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                                 projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                                 title: arguments[0],
                                 msg: JSON.stringify(res),
                                 category: CONST.ERROR_CATEGORY.AJAX,
                                 level: CONST.ERROR_LEVEL.ERROR
-                            });
+                            }));
                         }
                         return res;
                     })
                     .catch(error => {
-                        config.isAutoHandle && config.errorHandler({
-                            ...getLogBasicInfo(),
+                        config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                             projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                             title: arguments[0],
                             msg: JSON.stringify({
@@ -147,7 +142,7 @@ class Logger {
                             }),
                             category: CONST.ERROR_CATEGORY.AJAX,
                             level: CONST.ERROR_LEVEL.ERROR
-                        });
+                        }));
                         throw error;
                     })
             }
@@ -158,8 +153,7 @@ class Logger {
             let oldSend = xmlhttp.prototype.send;
             let handleEvent = function (event) {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
-                    config.isAutoHandle && config.errorHandler({
-                        ...getLogBasicInfo(),
+                    config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                         projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                         title: event.target.responseURL,
                         msg: JSON.stringify({
@@ -170,7 +164,7 @@ class Logger {
                         }),
                         category: CONST.ERROR_CATEGORY.AJAX,
                         level: CONST.ERROR_LEVEL.ERROR
-                    });
+                    }));
                 }
             }
             xmlhttp.prototype.send = function () {
@@ -200,14 +194,13 @@ class Logger {
         if (!window.console || !window.console.error) return;
         let oldConsoleError = window.console.error;
         window.console.error = function () {
-            config.isAutoHandle && config.errorHandler({
-                ...getLogBasicInfo(),
+            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectUid: CONFIG.DEFAULT_CONFIG.projectUid,
                 title: 'consoleError',
                 msg: JSON.stringify(arguments.join(',')),
                 category: CONST.ERROR_CATEGORY.JS,
                 level: CONST.ERROR_LEVEL.ERROR
-            });
+            }));
             oldConsoleError && oldConsoleError.apply(window, arguments);
         };
     }
