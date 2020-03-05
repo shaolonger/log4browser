@@ -15,6 +15,28 @@ const getLogBasicInfo = () => {
     };
 };
 
+const getErrorMessageAndStack = (projectUid, originErrorMsg, originErrorStack) => {
+    const errorMessage = originErrorMsg ? originErrorMsg : '';
+    const errorStack = originErrorStack ? originErrorStack : '';
+    let errorType = "";
+    if (errorMessage) {
+        if (typeof errorStack === 'string') {
+            errorType = errorStack.split(": ")[0].replace('"', "");
+        } else {
+            const errorStackStr = JSON.stringify(errorStack)
+            errorType = errorStackStr.split(": ")[0].replace('"', "");
+        }
+    }
+    return Object.assign({}, getLogBasicInfo(), {
+        projectUid,
+        logType: CONST.ERROR_CATEGORY.JS,
+        errorType,
+        errorMessage,
+        errorStack,
+        level: CONST.ERROR_LEVEL.ERROR
+    });
+};
+
 class Logger {
     constructor() {
     }
@@ -45,28 +67,11 @@ class Logger {
      * @param config
      */
     handleJsError(config) {
-        window.onerror = function (msg, url, line, col, error) {
-            if (error && error.stack) {
-                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                    projectUid: this.config.projectUid,
-                    title: msg,
-                    msg: error.stack,
-                    category: CONST.ERROR_CATEGORY.JS,
-                    level: CONST.ERROR_LEVEL.ERROR
-                }));
-            } else if (typeof msg === 'string') {
-                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                    projectUid: this.config.projectUid,
-                    title: msg,
-                    msg: JSON.stringify({
-                        resourceUrl: url,
-                        rowNum: line,
-                        colNum: col
-                    }),
-                    category: CONST.ERROR_CATEGORY.JS,
-                    level: CONST.ERROR_LEVEL.ERROR
-                }));
-            }
+        window.onerror = function (originErrorMsg, source, lineno, colno, error) {
+            const originErrorStack = error ? error.stack : null;
+            config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
+                config.projectUid, originErrorMsg, originErrorStack
+            ));
         };
     }
 
@@ -75,17 +80,20 @@ class Logger {
      * @param config
      */
     handlePromiseRejectError(config) {
-        window.addEventListener('unhandledrejection', function (event) {
-            if (event) {
-                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                    projectUid: this.config.projectUid,
-                    title: 'unhandledrejection',
-                    msg: event.reason,
-                    category: CONST.ERROR_CATEGORY.JS,
-                    level: CONST.ERROR_LEVEL.ERROR
-                }));
+        window.onunhandledrejection = function (event) {
+            let originErrorMsg = "";
+            let originErrorStack = "";
+            if (typeof event.reason === "object") {
+                originErrorMsg = event.reason.message;
+                originErrorStack = event.reason.stack;
+            } else {
+                originErrorMsg = event.reason;
+                originErrorStack = "";
             }
-        }, true);
+            config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
+                config.projectUid, originErrorMsg, "UncaughtInPromiseError: " + originErrorStack
+            ));
+        }
     }
 
     /**
@@ -94,18 +102,24 @@ class Logger {
      */
     handleResourceError(config) {
         window.addEventListener('error', function (event) {
-            if (event) {
-                let target = event.target || event.srcElement;
-                let isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
-                if (!isElementTarget) return; // JS errors has been captured by handleJsError method
-                config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                    projectUid: this.config.projectUid,
-                    title: target.nodeName,
-                    msg: target.src || target.href,
-                    category: CONST.ERROR_CATEGORY.RESOURCE,
-                    level: CONST.ERROR_LEVEL.ERROR
-                }));
+            const target = event.target || event.srcElement;
+            const isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
+            if (!isElementTarget) return; // JS errors has been captured by handleJsError method
+            const typeName = event.target.localName;
+            let sourceUrl = "";
+            if (typeName === "link") {
+                sourceUrl = event.target.href;
+            } else if (typeName === "script") {
+                sourceUrl = event.target.src;
             }
+            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+                projectUid: config.projectUid,
+                logType: CONST.ERROR_CATEGORY.RESOURCE,
+                resourceUrl: sourceUrl,
+                resourceType: typeName,
+                status: '0',
+                level: CONST.ERROR_LEVEL.ERROR
+            }));
         }, true);
     }
 
@@ -122,10 +136,12 @@ class Logger {
                     .then(res => {
                         if (!res.ok) {
                             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                                projectUid: this.config.projectUid,
-                                title: arguments[0],
-                                msg: JSON.stringify(res),
-                                category: CONST.ERROR_CATEGORY.AJAX,
+                                projectUid: config.projectUid,
+                                logType: CONST.ERROR_CATEGORY.AJAX,
+                                httpUrlComplete: arguments[0],
+                                httpUrlShort: arguments[0],
+                                status: res,
+                                statusText: res,
                                 level: CONST.ERROR_LEVEL.ERROR
                             }));
                         }
@@ -133,16 +149,14 @@ class Logger {
                     })
                     .catch(error => {
                         config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                            projectUid: this.config.projectUid,
-                            title: arguments[0],
-                            msg: JSON.stringify({
-                                message: error.message,
-                                stack: error.stack
-                            }),
-                            category: CONST.ERROR_CATEGORY.AJAX,
+                            projectUid: config.projectUid,
+                            logType: CONST.ERROR_CATEGORY.AJAX,
+                            httpUrlComplete: arguments[0],
+                            httpUrlShort: arguments[0],
+                            status: error.message,
+                            statusText: error.stack,
                             level: CONST.ERROR_LEVEL.ERROR
                         }));
-                        throw error;
                     })
             }
         }
@@ -153,15 +167,12 @@ class Logger {
             let handleEvent = function (event) {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
                     config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                        projectUid: this.config.projectUid,
-                        title: event.target.responseURL,
-                        msg: JSON.stringify({
-                            response: event.target.response,
-                            responseURL: event.target.responseURL,
-                            status: event.target.status,
-                            statusText: event.target.statusText
-                        }),
-                        category: CONST.ERROR_CATEGORY.AJAX,
+                        projectUid: config.projectUid,
+                        logType: CONST.ERROR_CATEGORY.AJAX,
+                        httpUrlComplete: event.target.responseURL,
+                        httpUrlShort: event.target.response,
+                        status: event.target.status,
+                        statusText: event.target.statusText,
                         level: CONST.ERROR_LEVEL.ERROR
                     }));
                 }
@@ -191,16 +202,14 @@ class Logger {
      */
     handleConsoleError(config) {
         if (!window.console || !window.console.error) return;
-        let oldConsoleError = window.console.error;
-        window.console.error = function () {
-            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                projectUid: this.config.projectUid,
-                title: 'consoleError',
-                msg: JSON.stringify(arguments.join(',')),
-                category: CONST.ERROR_CATEGORY.JS,
-                level: CONST.ERROR_LEVEL.ERROR
-            }));
-            oldConsoleError && oldConsoleError.apply(window, arguments);
+        const oldConsoleError = window.console.error;
+        window.console.error = function (otherErrorMsg) {
+            const originErrorMsg = (arguments[0] && arguments[0].message) || otherErrorMsg;
+            const originErrorStack = arguments[0] && arguments[0].stack;
+            config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
+                config.projectUid, originErrorMsg, originErrorStack
+            ));
+            return oldConsoleError.apply(window.console, arguments);
         };
     }
 
