@@ -1,6 +1,6 @@
 {
   "name": "log4browser",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A log helper for browser use.",
   "main": "src/index.js",
   "scripts": {
@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/shaolonger/log4browser/issues"
   },
-  "homepage": "https://github.com/shaolonger/log4browser#readme"
+  "homepage": "https://github.com/shaolonger/log4browser#readme",
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
 }
