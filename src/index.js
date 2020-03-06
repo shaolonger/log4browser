@@ -106,16 +106,18 @@ class Logger {
             const isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
             if (!isElementTarget) return; // JS errors has been captured by handleJsError method
             const typeName = event.target.localName;
-            let sourceUrl = "";
+            let resourceUrl = "";
             if (typeName === "link") {
-                sourceUrl = event.target.href;
+                resourceUrl = event.target.href;
             } else if (typeName === "script") {
-                sourceUrl = event.target.src;
+                resourceUrl = event.target.src;
+            } else if (typeName === "img") {
+                resourceUrl = event.target.src;
             }
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectUid: config.projectUid,
                 logType: CONST.ERROR_CATEGORY.RESOURCE,
-                resourceUrl: sourceUrl,
+                resourceUrl,
                 resourceType: typeName,
                 status: '0',
                 level: CONST.ERROR_LEVEL.ERROR
