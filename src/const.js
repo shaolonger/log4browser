@@ -11,10 +11,10 @@ const ERROR_LEVEL = {
  * Error categories
  */
 const ERROR_CATEGORY = {
-    'JS': 'js',
-    'RESOURCE': 'resource',
-    'AJAX': 'ajax',
-    'CUSTOM': 'custom',
+    'JS': 'JS_ERROR',
+    'RESOURCE': 'RESOURCE_LOAD_ERROR',
+    'AJAX': 'HTTP_ERROR',
+    'CUSTOM': 'CUSTOM_ERROR',
 };
 
 module.exports = {

@@ -206,12 +206,13 @@ class Logger {
         if (!window.console || !window.console.error) return;
         const oldConsoleError = window.console.error;
         window.console.error = function (otherErrorMsg) {
-            const originErrorMsg = (arguments[0] && arguments[0].message) || otherErrorMsg;
-            const originErrorStack = arguments[0] && arguments[0].stack;
+            const errorMessage = (arguments[0] && arguments[0].message) || otherErrorMsg;
+            const errorStack = arguments[0] && arguments[0].stack;
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectIdentifier: config.projectIdentifier,
                 logType: CONST.ERROR_CATEGORY.CUSTOM,
-                originErrorMsg, originErrorStack
+                errorType: CONST.ERROR_CATEGORY.CUSTOM,
+                errorMessage, errorStack
             }));
             return oldConsoleError.apply(window.console, arguments);
         };
