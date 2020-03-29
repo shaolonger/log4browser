@@ -13,7 +13,8 @@ const ERROR_LEVEL = {
 const ERROR_CATEGORY = {
     'JS': 'js',
     'RESOURCE': 'resource',
-    'AJAX': 'ajax'
+    'AJAX': 'ajax',
+    'CUSTOM': 'custom',
 };
 
 module.exports = {

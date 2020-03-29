@@ -208,9 +208,11 @@ class Logger {
         window.console.error = function (otherErrorMsg) {
             const originErrorMsg = (arguments[0] && arguments[0].message) || otherErrorMsg;
             const originErrorStack = arguments[0] && arguments[0].stack;
-            config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
-                config.projectIdentifier, originErrorMsg, originErrorStack
-            ));
+            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+                projectIdentifier: config.projectIdentifier,
+                logType: CONST.ERROR_CATEGORY.CUSTOM,
+                originErrorMsg, originErrorStack
+            }));
             return oldConsoleError.apply(window.console, arguments);
         };
     }
