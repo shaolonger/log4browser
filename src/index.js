@@ -15,7 +15,7 @@ const getLogBasicInfo = () => {
     };
 };
 
-const getErrorMessageAndStack = (projectUid, originErrorMsg, originErrorStack) => {
+const getErrorMessageAndStack = (projectIdentifier, originErrorMsg, originErrorStack) => {
     const errorMessage = originErrorMsg ? originErrorMsg : '';
     const errorStack = originErrorStack ? originErrorStack : '';
     let errorType = "";
@@ -28,7 +28,7 @@ const getErrorMessageAndStack = (projectUid, originErrorMsg, originErrorStack) =
         }
     }
     return Object.assign({}, getLogBasicInfo(), {
-        projectUid,
+        projectIdentifier,
         logType: CONST.ERROR_CATEGORY.JS,
         errorType,
         errorMessage,
@@ -70,7 +70,7 @@ class Logger {
         window.onerror = function (originErrorMsg, source, lineno, colno, error) {
             const originErrorStack = error ? error.stack : null;
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
-                config.projectUid, originErrorMsg, originErrorStack
+                config.projectIdentifier, originErrorMsg, originErrorStack
             ));
         };
     }
@@ -91,7 +91,7 @@ class Logger {
                 originErrorStack = "";
             }
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
-                config.projectUid, originErrorMsg, "UncaughtInPromiseError: " + originErrorStack
+                config.projectIdentifier, originErrorMsg, "UncaughtInPromiseError: " + originErrorStack
             ));
         }
     }
@@ -115,7 +115,7 @@ class Logger {
                 resourceUrl = event.target.src;
             }
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                projectUid: config.projectUid,
+                projectIdentifier: config.projectIdentifier,
                 logType: CONST.ERROR_CATEGORY.RESOURCE,
                 resourceUrl,
                 resourceType: typeName,
@@ -138,7 +138,7 @@ class Logger {
                     .then(res => {
                         if (!res.ok) {
                             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                                projectUid: config.projectUid,
+                                projectIdentifier: config.projectIdentifier,
                                 logType: CONST.ERROR_CATEGORY.AJAX,
                                 httpUrlComplete: arguments[0],
                                 httpUrlShort: arguments[0],
@@ -151,7 +151,7 @@ class Logger {
                     })
                     .catch(error => {
                         config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                            projectUid: config.projectUid,
+                            projectIdentifier: config.projectIdentifier,
                             logType: CONST.ERROR_CATEGORY.AJAX,
                             httpUrlComplete: arguments[0],
                             httpUrlShort: arguments[0],
@@ -169,7 +169,7 @@ class Logger {
             let handleEvent = function (event) {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
                     config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
-                        projectUid: config.projectUid,
+                        projectIdentifier: config.projectIdentifier,
                         logType: CONST.ERROR_CATEGORY.AJAX,
                         httpUrlComplete: event.target.responseURL,
                         httpUrlShort: event.target.response,
@@ -209,7 +209,7 @@ class Logger {
             const originErrorMsg = (arguments[0] && arguments[0].message) || otherErrorMsg;
             const originErrorStack = arguments[0] && arguments[0].stack;
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
-                config.projectUid, originErrorMsg, originErrorStack
+                config.projectIdentifier, originErrorMsg, originErrorStack
             ));
             return oldConsoleError.apply(window.console, arguments);
         };

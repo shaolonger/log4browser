@@ -22,7 +22,7 @@ var logger = new log4browser();
 
 // 2.init with your own config
 var config = {
-    projectUid: '',
+    projectIdentifier: '',
     captureJsError: true,
     captureResourceError: true,
     captureAjaxError: true,

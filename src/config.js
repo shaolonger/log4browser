@@ -2,7 +2,7 @@
  * The default config
  */
 const DEFAULT_CONFIG = {
-    projectUid: '',
+    projectIdentifier: '',
     captureJsError: true,
     captureResourceError: true,
     captureAjaxError: true,
