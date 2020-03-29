@@ -8,16 +8,16 @@ const ERROR_LEVEL = {
 };
 
 /**
- * Error categories
+ * Error types
  */
-const ERROR_CATEGORY = {
-    'JS': 'JS_ERROR',
-    'RESOURCE': 'RESOURCE_LOAD_ERROR',
-    'AJAX': 'HTTP_ERROR',
-    'CUSTOM': 'CUSTOM_ERROR',
+const ERROR_TYPE = {
+    'JS_ERROR': 'JS_ERROR',
+    'RESOURCE_LOAD_ERROR': 'RESOURCE_LOAD_ERROR',
+    'HTTP_ERROR': 'HTTP_ERROR',
+    'CUSTOM_ERROR': 'CUSTOM_ERROR',
 };
 
 module.exports = {
     ERROR_LEVEL,
-    ERROR_CATEGORY
+    ERROR_TYPE
 };

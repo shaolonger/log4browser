@@ -29,7 +29,7 @@ const getErrorMessageAndStack = (projectIdentifier, originErrorMsg, originErrorS
     }
     return Object.assign({}, getLogBasicInfo(), {
         projectIdentifier,
-        logType: CONST.ERROR_CATEGORY.JS,
+        logType: CONST.ERROR_TYPE.JS_ERROR,
         errorType,
         errorMessage,
         errorStack,
@@ -116,7 +116,7 @@ class Logger {
             }
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectIdentifier: config.projectIdentifier,
-                logType: CONST.ERROR_CATEGORY.RESOURCE,
+                logType: CONST.ERROR_TYPE.RESOURCE_LOAD_ERROR,
                 resourceUrl,
                 resourceType: typeName,
                 status: '0',
@@ -139,7 +139,7 @@ class Logger {
                         if (!res.ok) {
                             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                                 projectIdentifier: config.projectIdentifier,
-                                logType: CONST.ERROR_CATEGORY.AJAX,
+                                logType: CONST.ERROR_TYPE.HTTP_ERROR,
                                 httpUrlComplete: arguments[0],
                                 httpUrlShort: arguments[0],
                                 status: res,
@@ -152,7 +152,7 @@ class Logger {
                     .catch(error => {
                         config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                             projectIdentifier: config.projectIdentifier,
-                            logType: CONST.ERROR_CATEGORY.AJAX,
+                            logType: CONST.ERROR_TYPE.HTTP_ERROR,
                             httpUrlComplete: arguments[0],
                             httpUrlShort: arguments[0],
                             status: error.message,
@@ -170,7 +170,7 @@ class Logger {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
                     config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                         projectIdentifier: config.projectIdentifier,
-                        logType: CONST.ERROR_CATEGORY.AJAX,
+                        logType: CONST.ERROR_TYPE.HTTP_ERROR,
                         httpUrlComplete: event.target.responseURL,
                         httpUrlShort: event.target.response,
                         status: event.target.status,
@@ -210,8 +210,8 @@ class Logger {
             const errorStack = arguments[0] && arguments[0].stack;
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectIdentifier: config.projectIdentifier,
-                logType: CONST.ERROR_CATEGORY.CUSTOM,
-                errorType: CONST.ERROR_CATEGORY.CUSTOM,
+                logType: CONST.ERROR_TYPE.CUSTOM_ERROR,
+                errorType: CONST.ERROR_TYPE.CUSTOM_ERROR,
                 errorMessage, errorStack
             }));
             return oldConsoleError.apply(window.console, arguments);
