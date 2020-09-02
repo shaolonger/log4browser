@@ -165,19 +165,24 @@ class Logger {
         // XMLHttpRequest
         if (window.XMLHttpRequest) {
             let xmlhttp = window.XMLHttpRequest;
+            let oldOpen = xmlhttp.prototype.open;
             let oldSend = xmlhttp.prototype.send;
             let handleEvent = function (event) {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
                     config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                         projectIdentifier: config.projectIdentifier,
                         logType: CONST.ERROR_TYPE.HTTP_ERROR,
-                        httpUrlComplete: event.target.responseURL,
-                        httpUrlShort: event.target.response,
+                        httpUrlComplete: event.target.responseURL || this._url,
+                        httpUrlShort: event.target.response || this._url,
                         status: event.target.status,
                         statusText: event.target.statusText,
                         level: CONST.ERROR_LEVEL.ERROR
                     }));
                 }
+            }
+            xmlhttp.prototype.open = function (mothod, url, ...args) {
+                this._url = url;
+                return oldOpen.apply(this, [mothod, url].concat(args));
             }
             xmlhttp.prototype.send = function () {
                 if (this['addEventListener']) {
