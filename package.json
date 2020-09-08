@@ -1,6 +1,6 @@
 {
   "name": "log4browser",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "A log helper for browser use.",
   "main": "src/index.js",
   "scripts": {
