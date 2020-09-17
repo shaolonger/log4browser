@@ -15,18 +15,7 @@ const getLogBasicInfo = () => {
     };
 };
 
-const getErrorMessageAndStack = (projectIdentifier, originErrorMsg, originErrorStack) => {
-    const errorMessage = originErrorMsg ? originErrorMsg : '';
-    const errorStack = originErrorStack ? originErrorStack : '';
-    let errorType = "";
-    if (errorMessage) {
-        if (typeof errorStack === 'string') {
-            errorType = errorStack.split(": ")[0].replace('"', "");
-        } else {
-            const errorStackStr = JSON.stringify(errorStack)
-            errorType = errorStackStr.split(": ")[0].replace('"', "");
-        }
-    }
+const getErrorMessageAndStack = (projectIdentifier, errorType, errorMessage, errorStack) => {
     return Object.assign({}, getLogBasicInfo(), {
         projectIdentifier,
         logType: CONST.ERROR_TYPE.JS_ERROR,
@@ -38,8 +27,7 @@ const getErrorMessageAndStack = (projectIdentifier, originErrorMsg, originErrorS
 };
 
 class Logger {
-    constructor() {
-    }
+    constructor() {}
 
     /**
      * The init method
@@ -67,10 +55,17 @@ class Logger {
      * @param config
      */
     handleJsError(config) {
-        window.onerror = function (originErrorMsg, source, lineno, colno, error) {
-            const originErrorStack = error ? error.stack : null;
+        window.onerror = function (message, source, lineno, colno, error) {
+            let errorType = '';
+            let errorMessage = '';
+            let errorStack = '';
+            if (error && error instanceof Error) {
+                errorType = error.name || '';
+                errorMessage = error.message || '';
+                errorStack = error.stack || '';
+            }
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
-                config.projectIdentifier, originErrorMsg, originErrorStack
+                config.projectIdentifier, errorType, errorMessage, errorStack
             ));
         };
     }
@@ -81,17 +76,18 @@ class Logger {
      */
     handlePromiseRejectError(config) {
         window.onunhandledrejection = function (event) {
-            let originErrorMsg = "";
-            let originErrorStack = "";
-            if (typeof event.reason === "object") {
-                originErrorMsg = event.reason.message;
-                originErrorStack = event.reason.stack;
+            const errorType = 'UncaughtInPromiseError';
+            let errorMessage = '';
+            let errorStack = '';
+            if (typeof event.reason === 'object') {
+                errorMessage = event.reason.message;
+                errorStack = event.reason.stack;
             } else {
-                originErrorMsg = event.reason;
-                originErrorStack = "";
+                errorMessage = event.reason;
+                errorStack = '';
             }
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
-                config.projectIdentifier, originErrorMsg, "UncaughtInPromiseError: " + originErrorStack
+                config.projectIdentifier, errorType, errorMessage, errorStack
             ));
         }
     }
@@ -106,12 +102,12 @@ class Logger {
             const isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
             if (!isElementTarget) return; // JS errors has been captured by handleJsError method
             const typeName = event.target.localName;
-            let resourceUrl = "";
-            if (typeName === "link") {
+            let resourceUrl = '';
+            if (typeName === 'link') {
                 resourceUrl = event.target.href;
-            } else if (typeName === "script") {
+            } else if (typeName === 'script') {
                 resourceUrl = event.target.src;
-            } else if (typeName === "img") {
+            } else if (typeName === 'img') {
                 resourceUrl = event.target.src;
             }
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
@@ -217,7 +213,8 @@ class Logger {
                 projectIdentifier: config.projectIdentifier,
                 logType: CONST.ERROR_TYPE.CUSTOM_ERROR,
                 errorType: CONST.ERROR_TYPE.CUSTOM_ERROR,
-                errorMessage, errorStack
+                errorMessage,
+                errorStack
             }));
             return oldConsoleError.apply(window.console, arguments);
         };
