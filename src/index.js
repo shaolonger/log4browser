@@ -73,6 +73,10 @@ class Log4Browser {
                 errorType = error.name || '';
                 errorMessage = error.message || message || '';
                 errorStack = error.stack || '';
+            } else {
+                errorType = 'Others';
+                errorMessage = message || '';
+                errorStack = '';
             }
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
                 config.projectIdentifier, errorType, errorMessage, errorStack
