@@ -27,5 +27,11 @@
   "dependencies": {
     "moment": "^2.24.0",
     "rollup": "^2.27.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "@rollup/plugin-babel": "^5.2.1",
+    "@rollup/plugin-node-resolve": "^9.0.0"
   }
 }
