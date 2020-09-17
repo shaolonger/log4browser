@@ -122,7 +122,20 @@ const getLocationInfo = () => {
     };
 };
 
+const getCurrentTime = () => {
+    const getTwoBit = number => ('00' + number).substr(-2);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = getTwoBit(now.getMonth() + 1);
+    const day = getTwoBit(now.getDate());
+    const hour = getTwoBit(now.getHours());
+    const minute = getTwoBit(now.getMinutes());
+    const second = getTwoBit(now.getSeconds());
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+};
+
 export {
     getDeviceInfo,
-    getLocationInfo
+    getLocationInfo,
+    getCurrentTime
 };

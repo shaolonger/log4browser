@@ -1,4 +1,3 @@
-import moment from 'moment';
 import * as UTILS from './utils';
 import {
     DEFAULT_CONFIG
@@ -12,7 +11,7 @@ const DEVICE_INFO = UTILS.getDeviceInfo();
 
 const getLogBasicInfo = () => {
     const basicInfo = {
-        happenTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+        happenTime: UTILS.getCurrentTime(),
         deviceName: DEVICE_INFO.deviceName,
         os: DEVICE_INFO.os,
         osVersion: DEVICE_INFO.osVersion,
