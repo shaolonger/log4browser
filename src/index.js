@@ -1,6 +1,8 @@
-import moment from 'moment';
-import * as CONFIG from './config';
+import * as moment from 'moment';
 import * as UTILS from './utils';
+import {
+    DEFAULT_CONFIG
+} from './config';
 
 const DEVICE_INFO = UTILS.getDeviceInfo();
 
@@ -39,7 +41,7 @@ class Log4Browser {
      * @param config
      */
     init(config) {
-        this.config = Object.assign({}, CONFIG.DEFAULT_CONFIG, config);
+        this.config = Object.assign({}, DEFAULT_CONFIG, config);
         if (this.config.captureJsError) {
             this.handleJsError(this.config);
             this.handlePromiseRejectError(this.config);

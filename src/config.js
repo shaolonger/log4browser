@@ -10,6 +10,6 @@ const DEFAULT_CONFIG = {
     isAutoHandle: true, // If true, log4browser will automatically call callback function
 };
 
-module.exports = {
+export {
     DEFAULT_CONFIG
 };
