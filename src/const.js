@@ -17,7 +17,7 @@ const ERROR_TYPE = {
     'CUSTOM_ERROR': 'CUSTOM_ERROR',
 };
 
-module.exports = {
+export {
     ERROR_LEVEL,
     ERROR_TYPE
 };
