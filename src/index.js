@@ -1,8 +1,12 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import * as UTILS from './utils';
 import {
     DEFAULT_CONFIG
 } from './config';
+import {
+    ERROR_LEVEL,
+    ERROR_TYPE
+} from './const';
 
 const DEVICE_INFO = UTILS.getDeviceInfo();
 
@@ -25,11 +29,11 @@ const getLogBasicInfo = () => {
 const getErrorMessageAndStack = (projectIdentifier, errorType, errorMessage, errorStack) => {
     return Object.assign({}, getLogBasicInfo(), {
         projectIdentifier,
-        logType: CONST.ERROR_TYPE.JS_ERROR,
+        logType: ERROR_TYPE.JS_ERROR,
         errorType,
         errorMessage,
         errorStack,
-        level: CONST.ERROR_LEVEL.ERROR
+        level: ERROR_LEVEL.ERROR
     });
 };
 
@@ -119,11 +123,11 @@ class Log4Browser {
             }
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectIdentifier: config.projectIdentifier,
-                logType: CONST.ERROR_TYPE.RESOURCE_LOAD_ERROR,
+                logType: ERROR_TYPE.RESOURCE_LOAD_ERROR,
                 resourceUrl,
                 resourceType: typeName,
                 status: '0',
-                level: CONST.ERROR_LEVEL.ERROR
+                level: ERROR_LEVEL.ERROR
             }));
         }, true);
     }
@@ -142,12 +146,12 @@ class Log4Browser {
                         if (!res.ok) {
                             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                                 projectIdentifier: config.projectIdentifier,
-                                logType: CONST.ERROR_TYPE.HTTP_ERROR,
+                                logType: ERROR_TYPE.HTTP_ERROR,
                                 httpUrlComplete: arguments[0],
                                 httpUrlShort: arguments[0],
                                 status: res,
                                 statusText: res,
-                                level: CONST.ERROR_LEVEL.ERROR
+                                level: ERROR_LEVEL.ERROR
                             }));
                         }
                         return res;
@@ -155,12 +159,12 @@ class Log4Browser {
                     .catch(error => {
                         config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                             projectIdentifier: config.projectIdentifier,
-                            logType: CONST.ERROR_TYPE.HTTP_ERROR,
+                            logType: ERROR_TYPE.HTTP_ERROR,
                             httpUrlComplete: arguments[0],
                             httpUrlShort: arguments[0],
                             status: error.message,
                             statusText: error.stack,
-                            level: CONST.ERROR_LEVEL.ERROR
+                            level: ERROR_LEVEL.ERROR
                         }));
                     })
             }
@@ -174,12 +178,12 @@ class Log4Browser {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
                     config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                         projectIdentifier: config.projectIdentifier,
-                        logType: CONST.ERROR_TYPE.HTTP_ERROR,
+                        logType: ERROR_TYPE.HTTP_ERROR,
                         httpUrlComplete: event.target.responseURL || this._url,
                         httpUrlShort: event.target.response || this._url,
                         status: event.target.status,
                         statusText: event.target.statusText,
-                        level: CONST.ERROR_LEVEL.ERROR
+                        level: ERROR_LEVEL.ERROR
                     }));
                 }
             }
@@ -218,8 +222,8 @@ class Log4Browser {
             const errorStack = arguments[0] && arguments[0].stack;
             config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
                 projectIdentifier: config.projectIdentifier,
-                logType: CONST.ERROR_TYPE.CUSTOM_ERROR,
-                errorType: CONST.ERROR_TYPE.CUSTOM_ERROR,
+                logType: ERROR_TYPE.CUSTOM_ERROR,
+                errorType: ERROR_TYPE.CUSTOM_ERROR,
                 errorMessage,
                 errorStack
             }));
