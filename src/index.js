@@ -31,7 +31,7 @@ const getErrorMessageAndStack = (projectIdentifier, errorType, errorMessage, err
     });
 };
 
-class Logger {
+class Log4Browser {
     constructor() {}
 
     /**
@@ -234,4 +234,4 @@ class Logger {
     }
 };
 
-export default Logger;
+export default Log4Browser;
