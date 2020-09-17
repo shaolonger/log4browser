@@ -104,6 +104,25 @@ const getDeviceInfo = () => {
     return device;
 };
 
-module.exports = {
-    getDeviceInfo
+const getLocationInfo = () => {
+    let pageUrl = '';
+    let pageKey = '';
+    if (window && window.location) {
+        const {
+            href,
+            hash,
+            pathname
+        } = window.location;
+        pageUrl = href;
+        pageKey = hash || pathname;
+    }
+    return {
+        pageUrl,
+        pageKey
+    };
+};
+
+export {
+    getDeviceInfo,
+    getLocationInfo
 };

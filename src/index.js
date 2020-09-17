@@ -1,17 +1,22 @@
-const moment = require('moment');
-const UTILS = require('./utils');
-const CONST = require('./const');
-const CONFIG = require('./config');
+import moment from 'moment';
+import * as CONFIG from './config';
+import * as UTILS from './utils';
+
 const DEVICE_INFO = UTILS.getDeviceInfo();
 
 const getLogBasicInfo = () => {
-    return {
+    const basicInfo = {
         happenTime: moment().format('YYYY-MM-DD HH:mm:ss'),
         deviceName: DEVICE_INFO.deviceName,
         os: DEVICE_INFO.os,
         osVersion: DEVICE_INFO.osVersion,
         browserName: DEVICE_INFO.browserName,
         browserVersion: DEVICE_INFO.browserVersion
+    };
+    const locationInfo = UTILS.getLocationInfo();
+    return {
+        ...basicInfo,
+        ...locationInfo
     };
 };
 
@@ -55,13 +60,13 @@ class Logger {
      * @param config
      */
     handleJsError(config) {
-        window.onerror = function (message, source, lineno, colno, error) {
+        window.onerror = (message, source, lineno, colno, error) => {
             let errorType = '';
             let errorMessage = '';
             let errorStack = '';
             if (error && error instanceof Error) {
                 errorType = error.name || '';
-                errorMessage = error.message || '';
+                errorMessage = error.message || message || '';
                 errorStack = error.stack || '';
             }
             config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
@@ -75,7 +80,7 @@ class Logger {
      * @param config
      */
     handlePromiseRejectError(config) {
-        window.onunhandledrejection = function (event) {
+        window.onunhandledrejection = event => {
             const errorType = 'UncaughtInPromiseError';
             let errorMessage = '';
             let errorStack = '';
@@ -97,7 +102,7 @@ class Logger {
      * @param config
      */
     handleResourceError(config) {
-        window.addEventListener('error', function (event) {
+        window.addEventListener('error', event => {
             const target = event.target || event.srcElement;
             const isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
             if (!isElementTarget) return; // JS errors has been captured by handleJsError method
@@ -229,4 +234,4 @@ class Logger {
     }
 };
 
-module.exports = Logger;
+export default Logger;

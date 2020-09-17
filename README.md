@@ -15,12 +15,21 @@ npm install log4browser
 ```
 
 ## Usage
+1.create instance
 ```javascript
-// 1.create instance
+// Common JS
 var log4browser = require("log4browser");
 var logger = new log4browser();
+```
 
-// 2.init with your own config
+```javascript
+// Or in ES Modules
+import log4browser from 'log4browser';
+var logger = new log4browser();
+```
+
+2.init with your own config
+```javascript
 var config = {
     projectIdentifier: '',
     captureJsError: true,
@@ -33,8 +42,10 @@ var config = {
     }
 };
 logger.init(config);
+```
 
-// 3.(optional)switch errorHandler automation
+3.(optional)switch errorHandler automation
+```javascript
 logger.setIsAutoHandle(false); // stop
 logger.setIsAutoHandle(true); // restart
 ```
