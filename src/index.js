@@ -16,7 +16,8 @@ const getLogBasicInfo = () => {
         os: DEVICE_INFO.os,
         osVersion: DEVICE_INFO.osVersion,
         browserName: DEVICE_INFO.browserName,
-        browserVersion: DEVICE_INFO.browserVersion
+        browserVersion: DEVICE_INFO.browserVersion,
+        netType: UTILS.getNetworkType()
     };
     const locationInfo = UTILS.getLocationInfo();
     return {
