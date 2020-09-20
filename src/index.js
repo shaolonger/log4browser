@@ -10,6 +10,7 @@ import {
 const DEVICE_INFO = UTILS.getDeviceInfo();
 
 const getLogBasicInfo = () => {
+    const ipInfo = UTILS.getIpInfo();
     const basicInfo = {
         happenTime: UTILS.getCurrentTime(),
         deviceName: DEVICE_INFO.deviceName,
@@ -17,7 +18,9 @@ const getLogBasicInfo = () => {
         osVersion: DEVICE_INFO.osVersion,
         browserName: DEVICE_INFO.browserName,
         browserVersion: DEVICE_INFO.browserVersion,
-        netType: UTILS.getNetworkType()
+        netType: UTILS.getNetworkType(),
+        ip_address: ipInfo.cip,
+        address: ipInfo.cname
     };
     const locationInfo = UTILS.getLocationInfo();
     return {
@@ -38,7 +41,9 @@ const getErrorMessageAndStack = (projectIdentifier, errorType, errorMessage, err
 };
 
 class Log4Browser {
-    constructor() {}
+    constructor() {
+        UTILS.setIpInfo();
+    }
 
     /**
      * The init method

@@ -139,7 +139,7 @@ const getNetworkType = () => {
     let networkStr = ua.match(/NetType\/\w+/) ? ua.match(/NetType\/\w+/)[0] : 'NetType/other';
     networkStr = networkStr.toLowerCase().replace('nettype/', '');
     let networkType;
-    switch(networkStr) {
+    switch (networkStr) {
         case 'wifi':
             networkType = 'wifi';
             break;
@@ -164,9 +164,26 @@ const getNetworkType = () => {
     return networkStr;
 };
 
+const setIpInfo = () => {
+    let script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'http://pv.sohu.com/cityjson?ie=utf-8'
+    script.onload = () => {
+        script.parentNode.removeChild(script);
+        script = null;
+    };
+    document.body.append(script);
+};
+
+const getIpInfo = () => {
+    return window.returnCitySN || {};
+};
+
 export {
     getDeviceInfo,
     getLocationInfo,
     getCurrentTime,
-    getNetworkType
+    getNetworkType,
+    setIpInfo,
+    getIpInfo
 };
