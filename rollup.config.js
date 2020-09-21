@@ -8,11 +8,11 @@ import {
 export default {
     input: 'src/index.js',
     output: [{
-        file: 'dist/log4browser.js',
+        file: 'lib/log4browser.js',
         format: 'umd',
         name: 'Log4Browser'
     }, {
-        file: 'dist/log4browser.min.js',
+        file: 'lib/log4browser.min.js',
         format: 'umd',
         name: 'Log4Browser',
         plugins: [terser()]
