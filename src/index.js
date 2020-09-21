@@ -19,7 +19,7 @@ const getLogBasicInfo = () => {
         browserName: DEVICE_INFO.browserName,
         browserVersion: DEVICE_INFO.browserVersion,
         netType: UTILS.getNetworkType(),
-        ip_address: ipInfo.cip,
+        ipAddress: ipInfo.cip,
         address: ipInfo.cname
     };
     const locationInfo = UTILS.getLocationInfo();
