@@ -1,6 +1,6 @@
 {
   "name": "log4browser",
-  "version": "1.8.3",
+  "version": "1.9.0",
   "description": "A log helper for browser use.",
   "main": "lib/log4browser.min.js",
   "scripts": {
