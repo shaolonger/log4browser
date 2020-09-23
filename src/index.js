@@ -4,11 +4,16 @@ import {
 } from './config';
 import {
     ERROR_LEVEL,
-    ERROR_TYPE
+    ERROR_TYPE,
+    DEFAULT_BUFFER_CAPACITY
 } from './const';
+import LogBufferPool from './core/LogBufferPool';
 
 const DEVICE_INFO = UTILS.getDeviceInfo();
 
+/**
+ * Get basic info of Log
+ */
 const getLogBasicInfo = () => {
     const ipInfo = UTILS.getIpInfo();
     const basicInfo = {
@@ -29,15 +34,23 @@ const getLogBasicInfo = () => {
     };
 };
 
+/**
+ * Get error message and stack
+ * @param {String} projectIdentifier 
+ * @param {String} errorType 
+ * @param {String} errorMessage 
+ * @param {String} errorStack 
+ */
 const getErrorMessageAndStack = (projectIdentifier, errorType, errorMessage, errorStack) => {
-    return Object.assign({}, getLogBasicInfo(), {
+    return {
+        ...getLogBasicInfo(),
         projectIdentifier,
         logType: ERROR_TYPE.JS_ERROR,
         errorType,
         errorMessage,
         errorStack,
         level: ERROR_LEVEL.ERROR
-    });
+    };
 };
 
 class Log4Browser {
@@ -47,10 +60,17 @@ class Log4Browser {
 
     /**
      * The init method
-     * @param config
+     * @param {Object} config 
      */
     init(config) {
-        this.config = Object.assign({}, DEFAULT_CONFIG, config);
+        this.config = {
+            ...DEFAULT_CONFIG,
+            ...config
+        };
+        if (this.config.isEnableBuffer) {
+            const capacity = this.config.bufferCapacity || DEFAULT_BUFFER_CAPACITY;
+            this.bufferPool = new LogBufferPool(capacity, this.config.errorHandler);
+        }
         if (this.config.captureJsError) {
             this.handleJsError(this.config);
             this.handlePromiseRejectError(this.config);
@@ -68,9 +88,10 @@ class Log4Browser {
 
     /**
      * Handle JS errors
-     * @param config
+     * @param {Object} config 
      */
     handleJsError(config) {
+        const __this = this;
         window.onerror = (message, source, lineno, colno, error) => {
             let errorType = '';
             let errorMessage = '';
@@ -84,17 +105,23 @@ class Log4Browser {
                 errorMessage = message || '';
                 errorStack = '';
             }
-            config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
+            const errorInfo = getErrorMessageAndStack(
                 config.projectIdentifier, errorType, errorMessage, errorStack
-            ));
+            );
+            if (config.isEnableBuffer) {
+                __this.bufferPool.push(errorInfo);
+            } else {
+                config.isAutoHandle && config.errorHandler(errorInfo);
+            }
         };
     }
 
     /**
      * Handle Promise errors
-     * @param config
+     * @param {Object} config 
      */
     handlePromiseRejectError(config) {
+        const __this = this;
         window.onunhandledrejection = event => {
             const errorType = 'UncaughtInPromiseError';
             let errorMessage = '';
@@ -106,17 +133,23 @@ class Log4Browser {
                 errorMessage = event.reason;
                 errorStack = '';
             }
-            config.isAutoHandle && config.errorHandler(getErrorMessageAndStack(
+            const errorInfo = getErrorMessageAndStack(
                 config.projectIdentifier, errorType, errorMessage, errorStack
-            ));
+            );
+            if (config.isEnableBuffer) {
+                __this.bufferPool.push(errorInfo);
+            } else {
+                config.isAutoHandle && config.errorHandler(errorInfo);
+            }
         }
     }
 
     /**
      * Handle Resource errors
-     * @param config
+     * @param {Object} config 
      */
     handleResourceError(config) {
+        const __this = this;
         window.addEventListener('error', event => {
             const target = event.target || event.srcElement;
             const isElementTarget = target instanceof HTMLScriptElement || target instanceof HTMLLinkElement || target instanceof HTMLImageElement;
@@ -130,22 +163,29 @@ class Log4Browser {
             } else if (typeName === 'img') {
                 resourceUrl = event.target.src;
             }
-            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+            const errorInfo = {
+                ...getLogBasicInfo(),
                 projectIdentifier: config.projectIdentifier,
                 logType: ERROR_TYPE.RESOURCE_LOAD_ERROR,
                 resourceUrl,
                 resourceType: typeName,
                 status: '0',
                 level: ERROR_LEVEL.ERROR
-            }));
+            };
+            if (config.isEnableBuffer) {
+                __this.bufferPool.push(errorInfo);
+            } else {
+                config.isAutoHandle && config.errorHandler(errorInfo);
+            }
         }, true);
     }
 
     /**
      * Handle Ajax errors
-     * @param config
+     * @param {Object} config 
      */
     handleAjaxError(config) {
+        const __this = this;
         // fetch
         if (window.fetch) {
             let oldFetch = window.fetch;
@@ -153,7 +193,8 @@ class Log4Browser {
                 return oldFetch.apply(this, arguments)
                     .then(res => {
                         if (!res.ok) {
-                            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+                            const errorInfo = {
+                                ...getLogBasicInfo(),
                                 projectIdentifier: config.projectIdentifier,
                                 logType: ERROR_TYPE.HTTP_ERROR,
                                 httpUrlComplete: arguments[0],
@@ -161,12 +202,18 @@ class Log4Browser {
                                 status: res,
                                 statusText: res,
                                 level: ERROR_LEVEL.ERROR
-                            }));
+                            };
+                            if (config.isEnableBuffer) {
+                                __this.bufferPool.push(errorInfo);
+                            } else {
+                                config.isAutoHandle && config.errorHandler(errorInfo);
+                            }
                         }
                         return res;
                     })
                     .catch(error => {
-                        config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+                        const errorInfo = {
+                            ...getLogBasicInfo(),
                             projectIdentifier: config.projectIdentifier,
                             logType: ERROR_TYPE.HTTP_ERROR,
                             httpUrlComplete: arguments[0],
@@ -174,7 +221,12 @@ class Log4Browser {
                             status: error.message,
                             statusText: error.stack,
                             level: ERROR_LEVEL.ERROR
-                        }));
+                        };
+                        if (config.isEnableBuffer) {
+                            __this.bufferPool.push(errorInfo);
+                        } else {
+                            config.isAutoHandle && config.errorHandler(errorInfo);
+                        }
                     })
             }
         }
@@ -185,7 +237,8 @@ class Log4Browser {
             let oldSend = xmlhttp.prototype.send;
             let handleEvent = function (event) {
                 if (event && event.currentTarget && event.currentTarget.status !== 200) {
-                    config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+                    const errorInfo = {
+                        ...getLogBasicInfo(),
                         projectIdentifier: config.projectIdentifier,
                         logType: ERROR_TYPE.HTTP_ERROR,
                         httpUrlComplete: event.target.responseURL || this._url,
@@ -193,7 +246,12 @@ class Log4Browser {
                         status: event.target.status,
                         statusText: event.target.statusText,
                         level: ERROR_LEVEL.ERROR
-                    }));
+                    };
+                    if (config.isEnableBuffer) {
+                        __this.bufferPool.push(errorInfo);
+                    } else {
+                        config.isAutoHandle && config.errorHandler(errorInfo);
+                    }
                 }
             }
             xmlhttp.prototype.open = function (mothod, url, ...args) {
@@ -221,28 +279,35 @@ class Log4Browser {
 
     /**
      * Handle console errors
-     * @param config
+     * @param {Object} config 
      */
     handleConsoleError(config) {
         if (!window.console || !window.console.error) return;
         const oldConsoleError = window.console.error;
+        const __this = this;
         window.console.error = function (otherErrorMsg) {
             const errorMessage = (arguments[0] && arguments[0].message) || otherErrorMsg;
             const errorStack = arguments[0] && arguments[0].stack;
-            config.isAutoHandle && config.errorHandler(Object.assign({}, getLogBasicInfo(), {
+            const errorInfo = {
+                ...getLogBasicInfo(),
                 projectIdentifier: config.projectIdentifier,
                 logType: ERROR_TYPE.CUSTOM_ERROR,
                 errorType: ERROR_TYPE.CUSTOM_ERROR,
                 errorMessage,
                 errorStack
-            }));
+            };
+            if (config.isEnableBuffer) {
+                __this.bufferPool.push(errorInfo);
+            } else {
+                config.isAutoHandle && config.errorHandler(errorInfo);
+            }
             return oldConsoleError.apply(window.console, arguments);
         };
     }
 
     /**
      * Switch isAutoHandle
-     * @param isAutoHandle
+     * @param {Boolean} isAutoHandle 
      */
     setIsAutoHandle(isAutoHandle) {
         this.config.isAutoHandle = !!isAutoHandle;

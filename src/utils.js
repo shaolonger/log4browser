@@ -1,3 +1,8 @@
+import {
+    CONNECTION_TYPE,
+    EFFECTIVE_TYPE
+} from './const';
+
 const getDeviceInfo = () => {
     const device = {};
     const ua = navigator.userAgent;
@@ -135,32 +140,14 @@ const getCurrentTime = () => {
 };
 
 const getNetworkType = () => {
-    // The following info comes from https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
-    const typesMap = {
-        NONE: 'none',
-        BLUETOOTH: 'bluetooth',
-        CELLULAR: 'cellular',
-        ETHERNET: 'ethernet',
-        MIXED: 'mixed',
-        UNKNOWN: 'unknown',
-        WIFI: 'wifi',
-        WIMAX: 'wimax',
-        OTHER: 'other'
-    };
-    const effectiveTypesMap = {
-        '2G': '2g',
-        '3G': '3g',
-        '4G': '4g',
-        'SLOW2G': 'slow-2g'
-    };
     const networkInformation = navigator.connection;
     let netType = '';
     if (networkInformation && networkInformation.type) {
         const type = networkInformation.type;
-        if (type === typesMap.NONE) {
+        if (type === CONNECTION_TYPE.NONE) {
             netType = 'disconnected';
-        } else if (type === typesMap.CELLULAR) {
-            netType = networkInformation.effectiveType === effectiveTypesMap.SLOW2G ? '2g' : networkInformation.effectiveType;
+        } else if (type === CONNECTION_TYPE.CELLULAR) {
+            netType = networkInformation.effectiveType === EFFECTIVE_TYPE.SLOW2G ? '2g' : networkInformation.effectiveType;
         } else {
             netType = type;
         }
