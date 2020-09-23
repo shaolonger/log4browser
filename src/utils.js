@@ -8,8 +8,8 @@ const getDeviceInfo = () => {
     const mobileInfo = ua.match(/Android\s[\S\s]+Build\//);
     device.ios = device.android = device.iphone = device.iPad = device.androidChrome = false;
     device.isWeixin = /MicroMessenger/i.test(ua);
-    device.os = "web";
-    device.deviceName = "PC";
+    device.os = 'web';
+    device.deviceName = 'PC';
     // Android
     if (android) {
         device.os = 'android';
@@ -40,30 +40,30 @@ const getDeviceInfo = () => {
             device.osVersion = ua.toLowerCase().split('version/')[1].split(' ')[0];
         }
     }
-    // if is ios, then set deviceName as "iphone", and separate with ratio
+    // if is ios, then set deviceName as 'iphone', and separate with ratio
     if (device.iphone) {
-        device.deviceName = "iphone";
+        device.deviceName = 'iphone';
         const screenWidth = window.screen.width;
         const screenHeight = window.screen.height;
         if (screenWidth === 320 && screenHeight === 480) {
-            device.deviceName = "iphone 4";
+            device.deviceName = 'iphone 4';
         } else if (screenWidth === 320 && screenHeight === 568) {
-            device.deviceName = "iphone 5/SE";
+            device.deviceName = 'iphone 5/SE';
         } else if (screenWidth === 375 && screenHeight === 667) {
-            device.deviceName = "iphone 6/7/8";
+            device.deviceName = 'iphone 6/7/8';
         } else if (screenWidth === 414 && screenHeight === 736) {
-            device.deviceName = "iphone 6/7/8 Plus";
+            device.deviceName = 'iphone 6/7/8 Plus';
         } else if (screenWidth === 375 && screenHeight === 812) {
-            device.deviceName = "iphone X/S/Max";
+            device.deviceName = 'iphone X/S/Max';
         }
     } else if (device.iPad) {
-        device.deviceName = "iPad";
+        device.deviceName = 'iPad';
     } else if (mobileInfo) {
         const info = mobileInfo[0];
-        const deviceName = info.split(';')[1].replace(/Build\//g, "");
-        device.deviceName = deviceName.replace(/(^\s*)|(\s*$)/g, "");
+        const deviceName = info.split(';')[1].replace(/Build\//g, '');
+        device.deviceName = deviceName.replace(/(^\s*)|(\s*$)/g, '');
     }
-    if (ua.indexOf("Mobile") === -1) {
+    if (ua.indexOf('Mobile') === -1) {
         const agent = navigator.userAgent.toLowerCase();
         const regStr_ie = /msie [\d.]+;/gi;
         const regStr_ff = /firefox\/[\d.]+/gi;
@@ -73,28 +73,28 @@ const getDeviceInfo = () => {
         device.browserName = 'Unknown';
 
         // IE
-        if (agent.indexOf("msie") > 0) {
+        if (agent.indexOf('msie') > 0) {
             const browserInfo = agent.match(regStr_ie)[0];
             device.browserName = browserInfo.split('/')[0];
             device.browserVersion = browserInfo.split('/')[1];
         }
 
         // firefox
-        if (agent.indexOf("firefox") > 0) {
+        if (agent.indexOf('firefox') > 0) {
             const browserInfo = agent.match(regStr_ff)[0];
             device.browserName = browserInfo.split('/')[0];
             device.browserVersion = browserInfo.split('/')[1];
         }
 
         // Safari
-        if (agent.indexOf("safari") > 0 && agent.indexOf("chrome") < 0) {
+        if (agent.indexOf('safari') > 0 && agent.indexOf('chrome') < 0) {
             const browserInfo = agent.match(regStr_saf)[0];
             device.browserName = browserInfo.split('/')[0];
             device.browserVersion = browserInfo.split('/')[1];
         }
 
         // Chrome
-        if (agent.indexOf("chrome") > 0) {
+        if (agent.indexOf('chrome') > 0) {
             const browserInfo = agent.match(regStr_chrome)[0];
             device.browserName = browserInfo.split('/')[0];
             device.browserVersion = browserInfo.split('/')[1];
@@ -135,33 +135,37 @@ const getCurrentTime = () => {
 };
 
 const getNetworkType = () => {
-    const ua = navigator.userAgent;
-    let networkStr = ua.match(/NetType\/\w+/) ? ua.match(/NetType\/\w+/)[0] : 'NetType/other';
-    networkStr = networkStr.toLowerCase().replace('nettype/', '');
-    let networkType;
-    switch (networkStr) {
-        case 'wifi':
-            networkType = 'wifi';
-            break;
-        case '5g':
-            networkType = '5g';
-            break;
-        case '4g':
-            networkType = '4g';
-            break;
-        case '3g':
-            networkType = '3g';
-            break;
-        case '3gnet':
-            networkType = '3g';
-            break;
-        case '2g':
-            networkType = '2g';
-            break;
-        default:
-            networkType = 'other';
+    // The following info comes from https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
+    const typesMap = {
+        NONE: 'none',
+        BLUETOOTH: 'bluetooth',
+        CELLULAR: 'cellular',
+        ETHERNET: 'ethernet',
+        MIXED: 'mixed',
+        UNKNOWN: 'unknown',
+        WIFI: 'wifi',
+        WIMAX: 'wimax',
+        OTHER: 'other'
+    };
+    const effectiveTypesMap = {
+        '2G': '2g',
+        '3G': '3g',
+        '4G': '4g',
+        'SLOW2G': 'slow-2g'
+    };
+    const networkInformation = navigator.connection;
+    let netType = '';
+    if (networkInformation && networkInformation.type) {
+        const type = networkInformation.type;
+        if (type === typesMap.NONE) {
+            netType = 'disconnected';
+        } else if (type === typesMap.CELLULAR) {
+            netType = networkInformation.effectiveType === effectiveTypesMap.SLOW2G ? '2g' : networkInformation.effectiveType;
+        } else {
+            netType = type;
+        }
     }
-    return networkStr;
+    return netType;
 };
 
 const setIpInfo = () => {
