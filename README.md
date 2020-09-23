@@ -37,6 +37,8 @@ var config = {
     captureAjaxError: true,
     captureConsoleError: false,
     isAutoHandle: true, // if true, logger will call errorHandler automatically
+    isEnableBuffer: false, // if true, logger will create a buffer pool and save the concurrency info
+    bufferCapacity: 10, // the capacity of buffer pool
     errorHandler: function (logData) {
         // something to do with logData
     }
